@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Exam</title>
+    <style>
+        :root {
+            --primary-color: #673ab7; /* Google Form Purple */
+            --bg-color: #f0ebf8;
+            --card-bg: #ffffff;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --red-error: #d93025;
+            --green-success: #1e8e3e;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            margin-top: 20px;
+        }
+
+        /* Header Card */
+        .header-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border-top: 10px solid var(--primary-color);
+            padding: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .header-card h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin: 0 0 10px 0;
+        }
+
+        .header-card p {
+            font-size: 14px;
+            color: #5f6368;
+            margin: 0;
+        }
+
+        /* Question Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid transparent;
+            position: relative; /* For feedback positioning */
+        }
+
+        .card.active {
+            border-left: 5px solid #4285f4;
+        }
+
+        .question-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Input Fields (Text) */
+        .input-group input[type="text"], 
+        .input-group input[type="email"],
+        .input-group input[type="number"] {
+            width: 50%;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 0;
+            font-size: 14px;
+            outline: none;
+            transition: border-bottom 0.3s;
+        }
+
+        .input-group input:focus {
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Radio Buttons */
+        .option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        /* Section Header */
+        .section-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        /* Buttons */
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            float: left;
+        }
+
+        .btn-submit:hover {
+            background-color: #532c92;
+        }
+
+        /* Result Modal */
+        #resultModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 8px solid var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px auto;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background-color: #dadce0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .required-star {
+            color: var(--red-error);
+        }
+
+        /* FEEDBACK STYLES (New) */
+        .feedback-msg {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        
+        .feedback-correct {
+            color: var(--green-success);
+            border-left: 4px solid var(--green-success);
+        }
+
+        .feedback-wrong {
+            color: var(--red-error);
+            border-left: 4px solid var(--red-error);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-card">
+            <h1>Cybersecurity Exam</h1>
+            <p>Please fill out the form completely.</p>
+            <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 15px 0;">
+            <p style="color: var(--red-error); font-size: 12px;">* Indicates required question</p>
+        </div>
+
+        <form id="examForm">
+            <div class="card input-group">
+                <div class="question-text">Email <span class="required-star">*</span></div>
+                <input type="email" id="email" placeholder="Your email" required>
+            </div>
+
+            <div class="card input-group">
+                <div class="question-text">Student No. <span class="required-star">*</span></div>
+                <input type="text" id="studentNo" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group">
+                <div class="question-text">Full Name (Last Name, First Name, M.I) <span class="required-star">*</span></div>
+                <input type="text" id="fullName" placeholder="Your answer" required>
+            </div>
+
+            <div class="section-header">Part I: Multiple Choice</div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What is the definition of cyberspace? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q1" value="wrong1"> A physical environment where computers are stored</label>
+                <label class="option"><input type="radio" name="q1" value="correct"> The virtual environment of computer networks, including the internet</label>
+                <label class="option"><input type="radio" name="q1" value="wrong2"> The hardware components of a computer system</label>
+                <label class="option"><input type="radio" name="q1" value="wrong3"> The software applications used for cybersecurity</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is NOT listed as a component of cyberspace? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q2" value="wrong1"> Internet and networks</label>
+                <label class="option"><input type="radio" name="q2" value="wrong2"> Cloud computing and storage</label>
+                <label class="option"><input type="radio" name="q2" value="wrong3"> Digital communication</label>
+                <label class="option"><input type="radio" name="q2" value="correct"> Physical infrastructure</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What are the three key objectives of cybersecurity? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q3" value="correct"> Confidentiality, integrity, availability</label>
+                <label class="option"><input type="radio" name="q3" value="wrong1"> Hardware, software, networks</label>
+                <label class="option"><input type="radio" name="q3" value="wrong2"> Prevention, detection, response</label>
+                <label class="option"><input type="radio" name="q3" value="wrong3"> Encryption, authentication, authorization</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is described as a property of being genuine and being able to be verified and trusted? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q4" value="wrong1"> Confidentiality</label>
+                <label class="option"><input type="radio" name="q4" value="wrong2"> Integrity</label>
+                <label class="option"><input type="radio" name="q4" value="correct"> Authenticity</label>
+                <label class="option"><input type="radio" name="q4" value="wrong3"> Availability</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What type of cyber threat involves encrypting a user's data and demanding payment for access? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q5" value="wrong1"> DDoS attack</label>
+                <label class="option"><input type="radio" name="q5" value="wrong2"> Phishing</label>
+                <label class="option"><input type="radio" name="q5" value="wrong3"> Man-in-the-Middle attack</label>
+                <label class="option"><input type="radio" name="q5" value="correct"> Ransomware</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What is a challenge of computer security? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q6" value="correct"> It is often perceived as beneficial only after it fails</label>
+                <label class="option"><input type="radio" name="q6" value="wrong1"> It is too simple to implement</label>
+                <label class="option"><input type="radio" name="q6" value="wrong2"> It requires minimal monitoring</label>
+                <label class="option"><input type="radio" name="q6" value="wrong3"> It is always considered during system design</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which cybersecurity measure involves verifying a user's identity using multiple verification methods? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q7" value="correct"> Multi-factor authentication</label>
+                <label class="option"><input type="radio" name="q7" value="wrong1"> Intrusion detection system</label>
+                <label class="option"><input type="radio" name="q7" value="wrong2"> Firewall</label>
+                <label class="option"><input type="radio" name="q7" value="wrong3"> Data encryption</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What is "data integrity" in the context of cybersecurity? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q8" value="correct"> Assurance that data is changed only in a specified and authorized manner</label>
+                <label class="option"><input type="radio" name="q8" value="wrong1"> Assurance that data is not disclosed to unauthorized individuals</label>
+                <label class="option"><input type="radio" name="q8" value="wrong2"> Assurance that data is available when needed</label>
+                <label class="option"><input type="radio" name="q8" value="wrong3"> Assurance that data is properly encrypted</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is NOT mentioned as one of the five types of cybersecurity? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q9" value="wrong1"> Endpoint Security</label>
+                <label class="option"><input type="radio" name="q9" value="wrong2"> Network Security</label>
+                <label class="option"><input type="radio" name="q9" value="correct"> Physical Security</label>
+                <label class="option"><input type="radio" name="q9" value="wrong3"> Application Security</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What security design principle suggests that security measures should be as simple as possible? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q10" value="wrong1"> Open design</label>
+                <label class="option"><input type="radio" name="q10" value="wrong2"> Complete mediation</label>
+                <label class="option"><input type="radio" name="q10" value="wrong3"> Fail-safe defaults</label>
+                <label class="option"><input type="radio" name="q10" value="correct"> Economy of mechanism</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which cyber threat involves overwhelming a system with traffic to make it unavailable? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q11" value="wrong1"> Malware infection</label>
+                <label class="option"><input type="radio" name="q11" value="wrong2"> Phishing attack</label>
+                <label class="option"><input type="radio" name="q11" value="wrong3"> Zero-day exploit</label>
+                <label class="option"><input type="radio" name="q11" value="correct"> Denial of Service (DoS) attack</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What is the principle of "least astonishment" in security design? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q12" value="wrong1"> Attackers should be surprised by hidden security measures</label>
+                <label class="option"><input type="radio" name="q12" value="wrong2"> Security breaches should be minimally reported to avoid alarming users</label>
+                <label class="option"><input type="radio" name="q12" value="wrong3"> Systems should use the least amount of security measures possible</label>
+                <label class="option"><input type="radio" name="q12" value="correct"> A program should respond in a way that is least likely to surprise a user</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is a threat to confidentiality? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q13" value="wrong1"> Falsification</label>
+                <label class="option"><input type="radio" name="q13" value="wrong2"> Usurpation</label>
+                <label class="option"><input type="radio" name="q13" value="correct"> Unauthorized disclosure</label>
+                <label class="option"><input type="radio" name="q13" value="wrong3"> Disruption</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What does the security principle of "defense in depth" refer to? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q14" value="correct"> Using multiple, overlapping protection approaches</label>
+                <label class="option"><input type="radio" name="q14" value="wrong1"> Defending only the most critical systems</label>
+                <label class="option"><input type="radio" name="q14" value="wrong2"> Placing all security measures at the network perimeter</label>
+                <label class="option"><input type="radio" name="q14" value="wrong3"> Implementing the deepest possible encryption</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which future development in cybersecurity involves the use of technologies that could potentially break current encryption methods? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="q15" value="wrong1"> Mobile device management</label>
+                <label class="option"><input type="radio" name="q15" value="wrong2"> Blockchain for secure transactions</label>
+                <label class="option"><input type="radio" name="q15" value="correct"> Quantum computing</label>
+                <label class="option"><input type="radio" name="q15" value="wrong3"> Artificial intelligence in threat detection</label>
+            </div>
+
+            <div class="section-header">Part II: Identification</div>
+            
+            <div class="card input-group" data-type="text">
+                <div class="question-text">The virtual environment of computer networks, including the internet, is known as _____________. <span class="required-star">*</span></div>
+                <input type="text" name="fb1" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">One of the main goals of cybersecurity is _____________, which means protecting information from unauthorized access. <span class="required-star">*</span></div>
+                <input type="text" name="fb2" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">_____________ are programs like viruses and ransomware that can damage computer systems. <span class="required-star">*</span></div>
+                <input type="text" name="fb3" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">Using _____________ authentication adds an extra layer of security by requiring two or more forms of verification. <span class="required-star">*</span></div>
+                <input type="text" name="fb4" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">A _____________ attack aims to make a service unavailable to its users, often by overwhelming it with traffic. <span class="required-star">*</span></div>
+                <input type="text" name="fb5" placeholder="Your answer" required>
+            </div>
+
+            <div class="section-header">Part III: Fill in the Blank</div>
+
+            <div class="card">
+                <div class="question-text" style="text-align: center;">
+                    <br>
+                    <em>(Refer to the equation shown in your materials)</em>
+                </div>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">The equation for risk can be expressed as Risk = _____________ × Impact. <span class="required-star">*</span></div>
+                <input type="text" name="fb6" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">If you stop a risky activity completely to prevent harm, this is called risk _____________. <span class="required-star">*</span></div>
+                <input type="text" name="fb7" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">The process of finding out what could go wrong in your systems is called _____________ identification. <span class="required-star">*</span></div>
+                <input type="text" name="fb8" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">In information security, a _____________ is anything valuable you protect, such as customer data or servers. <span class="required-star">*</span></div>
+                <input type="text" name="fb9" placeholder="Your answer" required>
+            </div>
+
+            <div class="card input-group" data-type="text">
+                <div class="question-text">A _____________ is a weakness that can be exploited, like unpatched software or weak passwords. <span class="required-star">*</span></div>
+                <input type="text" name="fb10" placeholder="Your answer" required>
+            </div>
+
+            <div class="section-header">Part IV: Risk Management</div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which risk treatment option involves stopping the risky activity entirely? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r1" value="wrong1"> Reduce</label>
+                <label class="option"><input type="radio" name="r1" value="correct"> Avoid</label>
+                <label class="option"><input type="radio" name="r1" value="wrong2"> Accept</label>
+                <label class="option"><input type="radio" name="r1" value="wrong3"> Transfer</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is described as a high-impact control with good "security ROI"? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r2" value="wrong1"> Annual security audits</label>
+                <label class="option"><input type="radio" name="r2" value="correct"> Multi-factor authentication</label>
+                <label class="option"><input type="radio" name="r2" value="wrong2"> Hiring additional security staff</label>
+                <label class="option"><input type="radio" name="r2" value="wrong3"> Complex password requirements</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">In information security, how is risk commonly expressed? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r3" value="wrong1"> Risk = Control × Vulnerability</label>
+                <label class="option"><input type="radio" name="r3" value="wrong2"> Risk = Threat × Asset value</label>
+                <label class="option"><input type="radio" name="r3" value="wrong3"> Risk = Vulnerability × Impact</label>
+                <label class="option"><input type="radio" name="r3" value="correct"> Risk = Likelihood × Impact</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which technique focuses on creating a list of systems, applications, data, and accounts? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r4" value="wrong1"> Process and people review</label>
+                <label class="option"><input type="radio" name="r4" value="wrong2"> Vulnerability discovery</label>
+                <label class="option"><input type="radio" name="r4" value="wrong3"> Threat modeling</label>
+                <label class="option"><input type="radio" name="r4" value="correct"> Asset inventory and classification</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is NOT considered an asset in information security? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r5" value="wrong1"> Email systems</label>
+                <label class="option"><input type="radio" name="r5" value="wrong2"> Intellectual property</label>
+                <label class="option"><input type="radio" name="r5" value="wrong3"> Customer data</label>
+                <label class="option"><input type="radio" name="r5" value="correct"> Phishing attacks</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Which of the following is an example of a preventive control? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r6" value="correct"> Multi-factor authentication</label>
+                <label class="option"><input type="radio" name="r6" value="wrong1"> Incident response plans</label>
+                <label class="option"><input type="radio" name="r6" value="wrong2"> Security monitoring systems</label>
+                <label class="option"><input type="radio" name="r6" value="wrong3"> Backups</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">In the STRIDE threat modeling approach, what does the "R" stand for? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r7" value="wrong1"> Recovery</label>
+                <label class="option"><input type="radio" name="r7" value="correct"> Repudiation</label>
+                <label class="option"><input type="radio" name="r7" value="wrong2"> Risk</label>
+                <label class="option"><input type="radio" name="r7" value="wrong3"> Ransomware</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What is residual risk in information security? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r8" value="correct"> The risk remaining after controls are applied</label>
+                <label class="option"><input type="radio" name="r8" value="wrong1"> The risk that has been transferred to insurance</label>
+                <label class="option"><input type="radio" name="r8" value="wrong2"> The risk that cannot be identified</label>
+                <label class="option"><input type="radio" name="r8" value="wrong3"> The initial risk before any assessment</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">What type of control is designed to find incidents quickly? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r9" value="wrong1"> Deterrent control</label>
+                <label class="option"><input type="radio" name="r9" value="correct"> Detective control</label>
+                <label class="option"><input type="radio" name="r9" value="wrong2"> Corrective control</label>
+                <label class="option"><input type="radio" name="r9" value="wrong3"> Preventive control</label>
+            </div>
+
+            <div class="card" data-type="radio">
+                <div class="question-text">Why is risk management essential for information security? <span class="required-star">*</span></div>
+                <label class="option"><input type="radio" name="r10" value="wrong1"> It ensures all systems are equally secured</label>
+                <label class="option"><input type="radio" name="r10" value="wrong2"> It eliminates all security threats completely</label>
+                <label class="option"><input type="radio" name="r10" value="wrong3"> It makes security decisions without considering business operations</label>
+                <label class="option"><input type="radio" name="r10" value="correct"> It helps prioritize what to protect first</label>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit</button>
+            <div style="clear: both;"></div>
+        </form>
+    </div>
+
+    <div id="resultModal">
+        <div class="modal-content">
+            <h2>Exam Score</h2>
+            <div class="score-circle" id="scoreValue">0/30</div>
+            <p id="feedbackMessage">Good job!</p>
+            <button class="close-btn" onclick="document.getElementById('resultModal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('examForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let score = 0;
+            const totalItems = 30;
+
+            // Remove existing feedback messages to prevent duplicates
+            document.querySelectorAll('.feedback-msg').forEach(el => el.remove());
+
+            // Correct Answers for Fill in the Blanks
+            const answers = {
+                fb1: ["cyberspace"],
+                fb2: ["confidentiality"],
+                fb3: ["malware"],
+                fb4: ["multi-factor", "multifactor", "two-factor", "2fa", "mfa"],
+                fb5: ["denial of service", "dos"],
+                fb6: ["likelihood"],
+                fb7: ["avoidance"],
+                fb8: ["risk"],
+                fb9: ["asset"],
+                fb10: ["vulnerability"]
+            };
+
+            // 1. PROCESS RADIO BUTTONS (Multiple Choice)
+            // Need to find all unique radio names present
+            const radioGroups = new Set();
+            document.querySelectorAll('input[type="radio"]').forEach(r => radioGroups.add(r.name));
+
+            radioGroups.forEach(groupName => {
+                const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+                const userSelection = document.querySelector(`input[name="${groupName}"]:checked`);
+                const correctRadio = document.querySelector(`input[name="${groupName}"][value="correct"]`);
+                
+                // Determine the parent card for feedback placement
+                const card = radios[0].closest('.card');
+                
+                let isCorrect = false;
+
+                if (userSelection && userSelection.value === 'correct') {
+                    score++;
+                    isCorrect = true;
+                }
+
+                // Create Feedback Element
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback-msg';
+
+                if (isCorrect) {
+                    feedbackDiv.classList.add('feedback-correct');
+                    feedbackDiv.innerHTML = `✅ Correct!`;
+                } else {
+                    feedbackDiv.classList.add('feedback-wrong');
+                    // Get the text from the label of the correct radio
+                    const correctLabelText = correctRadio.parentElement.textContent.trim();
+                    feedbackDiv.innerHTML = `❌ Wrong. <br>Correct answer: <strong>${correctLabelText}</strong>`;
+                }
+                
+                card.appendChild(feedbackDiv);
+            });
+
+            // 2. PROCESS TEXT INPUTS (Fill in the Blanks)
+            for (let key in answers) {
+                const input = document.querySelector(`input[name="${key}"]`);
+                if (input) {
+                    const userVal = input.value.trim().toLowerCase();
+                    const card = input.closest('.card');
+                    
+                    let isCorrect = false;
+
+                    if (answers[key].includes(userVal)) {
+                        score++;
+                        isCorrect = true;
+                        input.style.borderBottom = "2px solid var(--green-success)";
+                    } else {
+                        input.style.borderBottom = "2px solid var(--red-error)";
+                    }
+
+                    // Create Feedback Element
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = 'feedback-msg';
+
+                    if (isCorrect) {
+                        feedbackDiv.classList.add('feedback-correct');
+                        feedbackDiv.innerHTML = `✅ Correct!`;
+                    } else {
+                        feedbackDiv.classList.add('feedback-wrong');
+                        // Show the first correct answer from the array
+                        feedbackDiv.innerHTML = `❌ Wrong. <br>Correct answer: <strong>${answers[key][0]}</strong>`;
+                    }
+                    
+                    card.appendChild(feedbackDiv);
+                }
+            }
+
+            // Display Result Modal
+            const scoreDisplay = document.getElementById('scoreValue');
+            scoreDisplay.innerText = `${score}/${totalItems}`;
+            
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            if (score === totalItems) {
+                feedbackMsg.innerText = "Perfect Score! Excellent!";
+            } else if (score >= totalItems * 0.7) {
+                feedbackMsg.innerText = "Great job! Keep it up.";
+            } else {
+                feedbackMsg.innerText = "Please review the correct answers below.";
+            }
+            
+            document.getElementById('resultModal').style.display = 'flex';
+        });
+
+        // Add focus effects for cards
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                const card = this.closest('.card');
+                if(card) card.classList.add('active');
+            });
+            input.addEventListener('blur', function() {
+                const card = this.closest('.card');
+                if(card) card.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
